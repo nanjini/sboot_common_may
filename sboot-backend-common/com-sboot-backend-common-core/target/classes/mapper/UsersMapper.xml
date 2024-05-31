@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sboot.backend.common.business.mapper.UsersMapper">
+
+    <insert id="insertUsers" parameterType="hashmap">
+        INSERT INTO users (
+            email
+            , name
+            , use_flag
+            , register_dt
+        )
+        VALUES
+        <foreach collection="userList" item="item" separator=",">
+        (
+            #{item.email}
+            <choose>
+                <when test="@org.springframework.util.StringUtils@hasText(item.name)">
+                    , #{item.name}
+                </when>
+                <otherwise>
+                    , null
+                </otherwise>
+            </choose>
+            <choose>
+                <when test="@org.springframework.util.StringUtils@hasText(item.useFlag)">
+                    , #{item.useFlag}
+                </when>
+                <otherwise>
+                    , null
+                </otherwise>
+            </choose>
+            ,#{item.registerDt}
+        )
+        </foreach>
+    </insert>
+
+    <insert id="insertUser" parameterType="com.sboot.backend.common.business.model.Users">
+        INSERT INTO users (email, name) VALUES(#{email}, #{name})
+    </insert>
+
+    <select id="getUserByEmail" parameterType="String" resultType="com.sboot.backend.common.business.model.Users">
+        SELECT *
+        FROM users
+        WHERE email = #{email}
+        AND delete_dt IS NULL
+    </select>
+
+    <select id="getUserAll" resultType="com.sboot.backend.common.business.model.Users" parameterType="com.sboot.backend.common.business.model.Users">
+        SELECT *
+        FROM users
+        WHERE delete_dt IS NULL
+        <if test="@org.springframework.util.StringUtils@hasText(email)">
+            AND email = #{email}
+        </if>
+        <if test="@org.springframework.util.StringUtils@hasText(name)">
+            AND name = #{name}
+        </if>
+        <if test="@org.springframework.util.StringUtils@hasText(useFlag)">
+            AND name = #{useFlag}
+        </if>
+    </select>
+
+    <select id="getUserCount" resultType="int" parameterType="com.sboot.backend.common.business.model.Users">
+        SELECT COUNT(*) AS CNT
+        FROM users
+        WHERE delete_dt IS NULL
+        <if test="@org.springframework.util.StringUtils@hasText(email)">
+            AND email = #{email}
+        </if>
+        <if test="@org.springframework.util.StringUtils@hasText(name)">
+            AND name = #{name}
+        </if>
+        <if test="@org.springframework.util.StringUtils@hasText(useFlag)">
+            AND name = #{useFlag}
+        </if>
+    </select>
+
+    <update id="updateUserByEmail" parameterType="com.sboot.backend.common.business.model.Users" >
+        UPDATE users
+        SET name = #{name}, use_flag = #{useFlag}
+        WHERE email = #{email}
+        AND delete_dt IS NULL
+    </update>
+
+    <update id="deleteUserByEmail" parameterType="com.sboot.backend.common.business.model.Users" >
+        UPDATE users
+        SET use_flag = #{useFlag}, delete_dt = #{deleteDt}
+        WHERE email = #{email}
+        AND delete_dt IS NULL
+    </update>
+</mapper>

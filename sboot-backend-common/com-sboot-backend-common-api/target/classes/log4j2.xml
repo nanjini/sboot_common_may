@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+
+    <Properties>
+        <Property name="LOG_MSG">%style{%d}{bright,cyan} [%highlight{%-5level}] [%style{%t}{bright,magenta}] %style{%C{1.}}{bright,blue}: %msg%n%throwable</Property>
+    </Properties>
+
+    <Appenders>
+        <Console name="ConsoleAppender" target="SYSTEM_OUT">
+            <PatternLayout charset="UTF-8" pattern="${LOG_MSG}%throwable" disableAnsi="false"/>
+        </Console>
+
+        <RollingFile name="AccessAppender"
+                     fileName="./logs/log4j2-accessLog.log"
+                     filePattern="./logs/$${date:yyyy-MM}/log4j2-accessLog-%d{yyyy-MMMM-dd}-%i.log.gz">
+            <Filters>
+                <ThresholdFilter level="info"  onMatch="ACCEPT" onMismatch="DENY" />
+            </Filters>
+            <PatternLayout charset="UTF-8" pattern="${LOG_MSG}"/>
+
+            <Policies>
+                <OnStartupTriggeringPolicy />
+                <SizeBasedTriggeringPolicy size="10 MB" />
+                <TimeBasedTriggeringPolicy />
+            </Policies>
+            <!-- log 파일 생성일 기준으로 30일이 지난 log 파일 삭제-->
+            <DefaultRolloverStrategy>
+                <Delete basePath="./logs" maxDepth="1">
+                    <IfFileName glob="lo4j2-accessLog-*-*.log.gz"/>
+                    <IfLastModified age="30d"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+
+        <RollingFile name="FileAppender"
+                     fileName="./logs/log4j2-file.log"
+                     filePattern="./logs/$${date:yyyy-MM}/log4j2-file-%d{yyyy-MMMM-dd}-%i.log.gz">
+            <Filters>
+                <!-- deny error, fatal -->
+                <ThresholdFilter level="error"  onMatch="DENY"   onMismatch="NEUTRAL"/>
+                <ThresholdFilter level="info"  onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <PatternLayout charset="UTF-8" pattern="${LOG_MSG}"/>
+            <Policies>
+                <OnStartupTriggeringPolicy />
+                <SizeBasedTriggeringPolicy size="10 MB" />
+                <TimeBasedTriggeringPolicy />
+            </Policies>
+            <DefaultRolloverStrategy>
+                <Delete basePath="./logs" maxDepth="2">
+                    <IfFileName glob="lo4j2-file-*-*.log.gz"/>
+                    <IfLastModified age="30d"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+
+        <RollingFile name="ErrorLogFileAppender"
+                     fileName="./logs/log4j2-error.log"
+                     filePattern="./logs/$${date:yyyy-MM}/log4j2-error-%d{yyyy-MMMM-dd}-%i.log.gz">
+            <Filters>
+                <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY" />
+            </Filters>
+            <PatternLayout charset="UTF-8" pattern="${LOG_MSG}"/>
+            <Policies>
+                <OnStartupTriggeringPolicy />
+                <SizeBasedTriggeringPolicy size="10 MB" />
+                <TimeBasedTriggeringPolicy />
+            </Policies>
+            <DefaultRolloverStrategy>
+                <Delete basePath="./logs" maxDepth="2">
+                    <IfFileName glob="lo4j2-error-%d{yyyy-MMMM}-*.log.gz"/>
+                    <IfLastModified age="30d"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+    </Appenders>
+
+    <Loggers>
+        <Root level="INFO">
+            <AppenderRef ref="ConsoleAppender" />
+            <AppenderRef ref="FileAppender"/>
+        </Root>
+
+        <Logger name="org.springframework.boot" additivity="false">
+            <AppenderRef ref="ErrorLogFileAppender"/>
+            <AppenderRef ref="ConsoleAppender"/>
+            <AppenderRef ref="FileAppender"/>
+        </Logger>
+
+        <Logger name="io.home.test.base.filter" additivity="false">
+            <AppenderRef ref="AccessAppender" />
+            <AppenderRef ref="ConsoleAppender"/>
+        </Logger>
+
+        <Logger name="io.home.test" additivity="false">
+            <AppenderRef ref="ErrorLogFileAppender"/>
+            <AppenderRef ref="FileAppender" />
+            <AppenderRef ref="ConsoleAppender"/>
+        </Logger>
+
+        <Logger name="jdbc.sqlonly" level="OFF" additivity="false">
+            <AppenderRef ref="ConsoleAppender"/>
+            <AppenderRef ref="FileAppender"/>
+        </Logger>
+
+        <Logger name="jdbc.sqltiming" level="INFO" additivity="false">
+            <AppenderRef ref="ConsoleAppender"/>
+            <AppenderRef ref="FileAppender"/>
+        </Logger>
+
+        <Logger name="jdbc.resultsettable" level="DEBUG" additivity="false">
+            <AppenderRef ref="ConsoleAppender"/>
+            <AppenderRef ref="FileAppender"/>
+        </Logger>
+
+        <Logger name="jdbc.audit" level="OFF" additivity="false">
+            <AppenderRef ref="ConsoleAppender"/>
+            <AppenderRef ref="FileAppender"/>
+        </Logger>
+
+        <Logger name="jdbc.resultset" level="OFF" additivity="false">
+            <AppenderRef ref="ConsoleAppender"/>
+            <AppenderRef ref="FileAppender"/>
+        </Logger>
+
+        <Logger name="jdbc.connection" level="OFF" additivity="false">
+            <AppenderRef ref="ConsoleAppender"/>
+            <AppenderRef ref="FileAppender"/>
+        </Logger>
+    </Loggers>
+
+</Configuration>
